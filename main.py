@@ -9,14 +9,14 @@ st.set_page_config(
         page_title="GibData",
 )
 def upload():    
-        
+        """
         st.set_page_config(
         page_title="Course Recommender",
         page_icon="🧠",
         layout="wide",
         initial_sidebar_state="expanded",
         )
-        
+        """
         st.title("Компетентностный подбор образовательных курсов")
         """
         cols = st.columns(1)
