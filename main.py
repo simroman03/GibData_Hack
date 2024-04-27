@@ -1,8 +1,16 @@
 import streamlit as st
 import streamlit_shadcn_ui as ui
 
+from sentence_transformers import SentenceTransformer
 
+
+def get_embeddings_bert_base_nli_mean_tokens(text):
+    """calculate similarity with bert_base_nli_mean_tokens"""
+    model = SentenceTransformer('bert-base-nli-mean-tokens')
+    sen_embeddings = model.encode(text)
+    return sen_embeddings
 def set_visual_components():
+    st.write(get_embeddings_bert_base_nli_mean_tokens(["Text"]))
     url = 'https://stackoverflow.com'
 
 
