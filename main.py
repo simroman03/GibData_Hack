@@ -90,7 +90,7 @@ class GeekBrainsParser:
             filtered_links = [link for link in links_on_course if re.match(pattern, link)]
             return filtered_links
         else:
-            print("Ошибка при загрузке страницы:", response.status_code)
+            st.write("Ошибка при загрузке страницы:", response.status_code)
             return []
 
     def get_html_from_url(self, url):
@@ -194,18 +194,18 @@ class Recommender:
 
     def init_modules(self):
         # Парсер GeekBrains
-        print("[INFO]: Парсинг данных с GeekBrains.ru...")
+        st.write("[INFO]: Парсинг данных с GeekBrains.ru...")
         self.geek_brain_parser = GeekBrainsParser()
         self.courses_dict = self.geek_brain_parser.get_courses_dict()
-        print("[SUCCESS]: Парсинг данных успешен.")
+        st.write("[SUCCESS]: Парсинг данных успешен.")
 
         self.geekbrains_embeddings = {}
         self.reshaped_geekbrains_embeddings = {}
 
         # Bert Base NLI Mean Tokens
-        print("[INFO]: Загрузка берта с GeekBrains.ru...")
+        st.write("[INFO]: Загрузка берта с GeekBrains.ru...")
         self.bert = SentenceTransformer('bert-base-nli-mean-tokens')
-        print("[SUCCESS]: Берт загружен.")
+        st.write("[SUCCESS]: Берт загружен.")
 
     def get_embeddings_bert_base_nli_mean_tokens(self, text):
         sen_embeddings = self.bert.encode(text)
@@ -233,10 +233,10 @@ class Recommender:
     def recommend(self, url: str, k: int or None = None):
         if k is None:
             k = self.k
-        print("[INFO]: Парсинг данных с hh.ru...")
+        st.write("[INFO]: Парсинг данных с hh.ru...")
         self.hh_parser = HHParser(url=url)
         self.job_info = self.hh_parser.get_job_info()
-        print("[SUCCESS]: Парсинг данных успешен.")
+        st.write("[SUCCESS]: Парсинг данных успешен.")
 
         recomendations = {}
         for url, course_info in self.courses_dict.items():
@@ -253,7 +253,7 @@ class Recommender:
 
 def set_visual_components():
     recommender = Recommender(k=5)    
-    print(recommender.recommend("https://hh.ru/vacancy/97976633", k=3))
+    st.write(recommender.recommend("https://hh.ru/vacancy/97976633", k=3))
     st.empty().markdown("&nbsp;")
     with st.sidebar:
         option = st.radio(
