@@ -432,8 +432,10 @@ def set_visual_components():
                 mssg,
                 label_visibility='visible'
             )
-            dict_hh = recommender.recommend(input_media, k=6)
-            coating_matrix = dict_hh['coverage_mtx'].copy()
+
+            if input_media is not None and "https" in input_media:
+                dict_hh = recommender.recommend(input_media, k=6)
+                coating_matrix = dict_hh['coverage_mtx'].copy()
 
     with st.sidebar:
         st.markdown(f"### :gray[Требования по вакансии:]")
