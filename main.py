@@ -447,16 +447,19 @@ def set_visual_components():
                 mssg,
                 label_visibility='visible'
             )
-
+            st.write("input media")
             if input_media is not None and "https" in input_media:
+                st.write("in input media")
                 input_url = input_media
 
         load_button = ui.button(text="Загрузить вакансию", key="load")
-    
+
+        st.write("load button")
         if load_button and input_url is not None:
             hh_parser = HHParser(url=input_url)
             job_info = hh_parser.get_job_info()
             job_parse = True
+            st.write("in load button")
 
             st.markdown(f"### :gray[Требования по вакансии:]")
             try:
@@ -477,8 +480,9 @@ def set_visual_components():
                                              className="bg-orange-500 text-white")
             with cols[1]:
                 delete_button = ui.button(text="Сбросить", key="d")
-        
+            st.write("recommend_button")
             if recommend_button and not delete_button:
+                st.write("in recommend_button")
                 dict_hh = recommender.recommend(job_info, k=2)
                 is_calculated = True
 
