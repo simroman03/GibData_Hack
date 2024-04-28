@@ -452,7 +452,7 @@ def set_visual_components():
 
         load_button = ui.button(text="Загрузить вакансию", key="load")
 
-        st.write("load button")
+        # st.write("load button")
         if load_button and input_url is not None:
             hh_parser = HHParser(url=input_url)
             job_info = hh_parser.get_job_info()
