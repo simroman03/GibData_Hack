@@ -456,7 +456,7 @@ def set_visual_components():
             delete_button = ui.button(text="Сбросить", key="d")
     
         if recommend_button and not delete_button and input_url is not None:
-            hh_parser = HHParser(url=url)
+            hh_parser = HHParser(url=input_url)
             job_info = self.hh_parser.get_job_info()
 
             st.markdown(f"### :gray[Требования по вакансии:]")
