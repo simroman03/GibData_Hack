@@ -411,8 +411,6 @@ class Recommender:
 
 def set_visual_components():
     recommender = Recommender(k=3)
-    recommend_button = False
-    delete_button = True
     is_calculated = False
     job_parse = False
     
