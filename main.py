@@ -252,6 +252,8 @@ class Recommender:
 
 
 def set_visual_components():
+    recommender = Recommender(k=5)    
+    print(recommender.recommend("https://hh.ru/vacancy/97976633", k=3))
     st.empty().markdown("&nbsp;")
     with st.sidebar:
         option = st.radio(
@@ -274,8 +276,7 @@ def set_visual_components():
                 mssg,
                 label_visibility='visible'
             )
-            recommender = Recommender(k=5)
-            recommender.recommend("https://hh.ru/vacancy/97976633", k=7)
+           
 
     with st.sidebar:
         st.markdown("### :orange[Требования по вакансии:]")
