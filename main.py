@@ -470,19 +470,19 @@ def set_visual_components():
                 switch_value = ui.switch(default_checked=True, label=job_info[i], key=f"switch_{i}")
                 switch_comp[job_info[i]] = switch_value
 
+            cols = st.columns(4)
+            with cols[0]:
+                recommend_button = ui.button(text="Рекомендовать",
+                                             key="styled_btn_tailwind",
+                                             className="bg-orange-500 text-white")
+            with cols[1]:
+                delete_button = ui.button(text="Сбросить", key="d")
+        
+            if recommend_button and not delete_button:
+                dict_hh = recommender.recommend(job_info, k=6)
+                is_calculated = True
+
     if job_parse:
-        cols = st.columns(4)
-        with cols[0]:
-            recommend_button = ui.button(text="Рекомендовать",
-                                         key="styled_btn_tailwind",
-                                         className="bg-orange-500 text-white")
-        with cols[1]:
-            delete_button = ui.button(text="Сбросить", key="d")
-    
-        if recommend_button and not delete_button:
-            dict_hh = recommender.recommend(job_info, k=6)
-            is_calculated = True
-    
         if is_calculated:
             coating_matrix = dict_hh['coverage_mtx'].copy()
             names = dict_hh['names'].copy()
