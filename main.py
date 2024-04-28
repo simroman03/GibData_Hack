@@ -374,14 +374,16 @@ class Recommender:
                 )
         return coverage_mtx
 
-    def recommend(self, input, k: int or None = None):
-        if input[-4:] == ".pdf":
-            job_info = self.get_job_info_from_pdf(input)
-        elif "https" in input:
-            job_info = self.get_job_info_from_url(input)
-        else:
-            job_info = self.get_job_info_from_text(input)
-
+    def recommend(self, job_info, k: int or None = None):
+        # if input[-4:] == ".pdf":
+        #     # job_info = self.get_job_info_from_pdf(input)
+        #     return
+        # elif "https" in input:
+        #     job_info = self.get_job_info_from_url(input)
+        # else:
+        #     # job_info = self.get_job_info_from_text(input)
+        #     return
+        
         if k is None:
             k = self.k
 
@@ -443,19 +445,7 @@ def set_visual_components():
             )
 
             if input_media is not None and "https" in input_media:
-                dict_hh = recommender.recommend(input_media, k=6)
-                coating_matrix = dict_hh['coverage_mtx'].copy()
-                names = dict_hh['names'].copy()
-
-                st.markdown(f"### :gray[Требования по вакансии:]")
-                try:
-                    st.markdown(f"### :orange[{dict_hh['job_info'][0]}]")
-                except:
-                    pass
-                st.empty().markdown('''### {}'''.format("Дополнительные фильтры:"),
-                                    help='Choose either 1 or 2 but not both. If both are selected 1 will be used.')
-                for i in range(1, len(dict_hh['job_info'])):
-                    switch_value = ui.switch(default_checked=True, label=dict_hh['job_info'][i], key=f"switch_{i}")
+                input_url = input_media
         
         cols = st.columns(2)
         with cols[0]:
@@ -465,10 +455,30 @@ def set_visual_components():
         with cols[1]:
             delete_button = ui.button(text="Сбросить", key="d")
     
-        if recommend_button and not delete_button:
+        if recommend_button and not delete_button and input_url is not None:
+            hh_parser = HHParser(url=url)
+            job_info = self.hh_parser.get_job_info()
+
+            st.markdown(f"### :gray[Требования по вакансии:]")
+            try:
+                st.markdown(f"### :orange[{job_info[0]}]")
+            except:
+                pass
+            st.empty().markdown('''### {}'''.format("Дополнительные фильтры:"),
+                                help='Choose either 1 or 2 but not both. If both are selected 1 will be used.')
+            switch_comp = {}
+            for i in range(1, len(job_info)):
+                switch_value = ui.switch(default_checked=True, label=job_info[i], key=f"switch_{i}")
+                switch_comp[job_info[i]] = switch_value
+            
+            dict_hh = recommender.recommend(job_info, k=6)
+            
+            coating_matrix = dict_hh['coverage_mtx'].copy()
+            names = dict_hh['names'].copy()
+            
             # sort_matrix = pd.DataFrame(coating_matrix.sum()).sort_values(by=0, ascending=False).reset_index()
-            sort_matrix = sort_matrix.style.map(lambda x: f"background-color: {'green' if x >= 0.85 else 'white'}", subset='Value')
-            st.dataframe(sort_matrix)
+            # sort_matrix = sort_matrix.style.map(lambda x: f"background-color: {'green' if x >= 0.85 else 'white'}", subset='Value')
+            st.dataframe(coating_matrix)
             
             st.empty().markdown('''### {}'''.format("Рекомендованные курсы"),
                                 help='Choose either 1 or 2 but not both. If both are selected 1 will be used.')
