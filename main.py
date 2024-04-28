@@ -473,7 +473,7 @@ def set_visual_components():
             with cols[1]:
                 delete_button = ui.button(text="Сбросить", key="d")
 
-            if recommend_button and delete_button is not None:
+            if recommend_button and not delete_button:
                 dict_hh = recommender.recommend(job_info, k=6)
                 
                 coating_matrix = dict_hh['coverage_mtx'].copy()
