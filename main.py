@@ -466,7 +466,7 @@ def set_visual_components():
             delete_button = ui.button(text="Сбросить", key="d")
     
         if recommend_button and not delete_button:
-            sort_matrix = pd.DataFrame(coating_matrix.sum()).sort_values(by=0, ascending=False).reset_index()
+            # sort_matrix = pd.DataFrame(coating_matrix.sum()).sort_values(by=0, ascending=False).reset_index()
             sort_matrix = sort_matrix.style.map(lambda x: f"background-color: {'green' if x >= 0.85 else 'white'}", subset='Value')
             st.dataframe(sort_matrix)
             
