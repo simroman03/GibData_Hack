@@ -471,7 +471,7 @@ def set_visual_components():
                 switch_comp[job_info[i]] = switch_value
 
     if job_parse:
-        cols = st.columns(8)
+        cols = st.columns(4)
         with cols[0]:
             recommend_button = ui.button(text="Рекомендовать",
                                          key="styled_btn_tailwind",
