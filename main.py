@@ -409,7 +409,6 @@ class Recommender:
 
 def set_visual_components():
     recommender = Recommender(k=3)    
-    st.write(recommender.recommend("https://hh.ru/vacancy/97976633", k=3))
     st.empty().markdown("&nbsp;")
     with st.sidebar:
         option = st.radio(
@@ -432,57 +431,39 @@ def set_visual_components():
                 mssg,
                 label_visibility='visible'
             )
+            dict_hh = (recommender.recommend(input_media, k=6))
+            coating_matrix = dict_hh['coverage_mtx'].copy()
+
            
 
     with st.sidebar:
-        st.markdown("### :orange[Требования по вакансии:]")
-        switch_value = ui.switch(default_checked=True, label="Toggle Switch", key="switch1")
-        switch_value = ui.switch(default_checked=True, label="Toggle Switch", key="switch2")
-        switch_value = ui.switch(default_checked=True, label="Toggle Switch", key="switch3")
+        st.markdown(f"### :gray[Требования по вакансии:]")
+        try:
+            st.markdown(f"### :orange[{dict_hh['job_info'][0]}]")
+        except:
+            pass
+        for i in range(1, len(dict_hh['job_info'])):
+            switch_value = ui.switch(default_checked=True, label=dict_hh['job_info'][i], key=f"switch_{i}")
+        cols = st.columns(2)
+        with cols[0]:
+            recommend_button = ui.button(text="Рекомендовать",
+                                                 key="styled_btn_tailwind",
+                                                 className="bg-orange-500 text-white", )
+        with cols[1]:
+            delete_button = ui.button(text="Сбросить", key="d", 
 
-
-    choice = ui.select(options=["Ссылка на вакансию", "PDF на вакансию"])
-    if choice == "Ссылка на вакансию":
-        textarea_value = ui.textarea(placeholder="https://hh.ru/vacancy/00000000",
-                                     key="textarea1")
-    elif choice == "PDF на вакансию":
-        uploaded_file = st.file_uploader("Choose a file")
-    cols = st.columns(3)
-    with cols[0]:
-
-        recommend_button = ui.button(text="Рекомендовать",
-                                     key="styled_btn_tailwind",
-                                     className="bg-orange-500 text-white", )
-    with cols[1]:
-        delete_button = ui.button(text="Сбросить", key="d", className="grey")
 
     if recommend_button and not delete_button:
+        st.dataframe(coating_matrix
+        sort_matrix = pd.DataFrame(coating_matrix.sum()).sort_values(by=0, ascending=False).reset_index()
         st.empty().markdown('''### {}'''.format("Рекомендованные курсы"),
                             help='Choose either 1 or 2 but not both. If both are selected 1 will be used.')
-        cols = st.columns(3)
-        with cols[0]:
-            switch_value = ui.switch(default_checked=True, label="Toggle Switch", key="switch1")
-        with cols[1]:
-            switch_value = ui.switch(default_checked=True, label="Toggle Switch", key="switch2")
-        with cols[2]:
-            switch_value = ui.switch(default_checked=True, label="Toggle Switch", key="switch3")
+        for i in range(len(sort_matrix)):
+            title = f"{sort_matrix['index'][i]}🔥"
+            content = "Специалист по внедрению Искуственного Интеллекта"
+            description = "Срок обучения: 6 месяцев"
+            ui.metric_card(title=title, content=content, description=description, key=f"card{i}")
 
-        cols = st.columns(3)
-        with cols[0]:
-            title = "Главный тренд года 🔥"
-            content = "Специалист по внедрению Искуственного Интеллекта"
-            description = "Срок обучения: 6 месяцев"
-            ui.metric_card(title=title, content=content, description=description, key="card4")
-        with cols[1]:
-            title = "Главный тренд года 🔥"
-            content = "Специалист по внедрению Искуственного Интеллекта"
-            description = "Срок обучения: 6 месяцев"
-            ui.metric_card(title=title, content=content, description=description, key="card5")
-        with cols[2]:
-            title = "Главный тренд года 🔥"
-            content = "Специалист по внедрению Искуственного Интеллекта"
-            description = "Срок обучения: 6 месяцев"
-            ui.metric_card(title=title, content=content, description=description, key="card6")
 
 if __name__ == "__main__":
        set_visual_components()
