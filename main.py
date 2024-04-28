@@ -345,6 +345,8 @@ class Recommender:
 
     def semantic_similarity_bert_base_nli_mean_tokens(self, job, course):
         score = 0
+        job = job if type(job) != str else job.split(" ")
+        course = course if type(course) != str else course.split(" ")
         sen = job + course
         sen_embeddings = self.bert.encode(sen)
         for i in range(len(job)):
