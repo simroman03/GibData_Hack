@@ -413,6 +413,7 @@ def set_visual_components():
     recommender = Recommender(k=3)
     recommend_button = False
     delete_button = True
+    is_calculated = False
     
     st.set_page_config(
         page_title="Course Recommender",
@@ -475,24 +476,26 @@ def set_visual_components():
             with cols[1]:
                 delete_button = ui.button(text="Сбросить", key="d")
 
-        if recommend_button and not delete_button:
-            dict_hh = recommender.recommend(job_info, k=6)
-            
-            coating_matrix = dict_hh['coverage_mtx'].copy()
-            names = dict_hh['names'].copy()
-            
-            # sort_matrix = pd.DataFrame(coating_matrix.sum()).sort_values(by=0, ascending=False).reset_index()
-            # sort_matrix = sort_matrix.style.map(lambda x: f"background-color: {'green' if x >= 0.85 else 'white'}", subset='Value')
-            st.dataframe(coating_matrix)
-            
-            st.empty().markdown('''### {}'''.format("Рекомендованные курсы"),
-                                help='Choose either 1 or 2 but not both. If both are selected 1 will be used.')
-            for i in range(len(sort_matrix)):
-                # title = f"{sort_matrix['url'][i]}🔥"
-                title = "url"
-                content = names[i]
-                description = "Срок обучения: n месяцев"
-                ui.metric_card(title=title, content=content, description=description, key=f"card{i}")
+            if recommend_button and not delete_button:
+                dict_hh = recommender.recommend(job_info, k=6)
+                is_calculated = True
+
+    if is_calculated:
+        coating_matrix = dict_hh['coverage_mtx'].copy()
+        names = dict_hh['names'].copy()
+        
+        # sort_matrix = pd.DataFrame(coating_matrix.sum()).sort_values(by=0, ascending=False).reset_index()
+        # sort_matrix = sort_matrix.style.map(lambda x: f"background-color: {'green' if x >= 0.85 else 'white'}", subset='Value')
+        st.dataframe(coating_matrix)
+        
+        st.empty().markdown('''### {}'''.format("Рекомендованные курсы"),
+                            help='Choose either 1 or 2 but not both. If both are selected 1 will be used.')
+        for i in range(len(sort_matrix)):
+            # title = f"{sort_matrix['url'][i]}🔥"
+            title = "url"
+            content = names[i]
+            description = "Срок обучения: n месяцев"
+            ui.metric_card(title=title, content=content, description=description, key=f"card{i}")
 
 
 if __name__ == "__main__":
