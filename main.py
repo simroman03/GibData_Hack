@@ -54,6 +54,7 @@ class TextExtractor:
     def get_job_info(self):
         return self.name + self.skills
 
+
 class FileParser:
     def __init__(self, file_path):
         self.file_path = file_path
@@ -75,7 +76,6 @@ class FileParser:
         return self.job_info
 
 
-
 class HHParser:
     def __init__(self, url: str):
         self.url = url
@@ -92,12 +92,12 @@ class HHParser:
         key_skills = vacancy.get("key_skills")
         vacancy_desc = vacancy.get("description")
         return (
-            f"ID: {vacancy_id}\nНазвание: {vacancy_title}"
-            + f"\nКомпания: {company_name}\nURL: {vacancy_url}"
-            + f"\nОпыт: {vacancy_exp}\nЗанятость: {vacancy_empl}"
-            + f"\nЗП: {salary}\nРоль:{professional_roles}"
-            + f"\nКлючевые навыки: {key_skills}\n"
-            + f"\nОписание: {vacancy_desc}\n"
+                f"ID: {vacancy_id}\nНазвание: {vacancy_title}"
+                + f"\nКомпания: {company_name}\nURL: {vacancy_url}"
+                + f"\nОпыт: {vacancy_exp}\nЗанятость: {vacancy_empl}"
+                + f"\nЗП: {salary}\nРоль:{professional_roles}"
+                + f"\nКлючевые навыки: {key_skills}\n"
+                + f"\nОписание: {vacancy_desc}\n"
         )
 
     def get_vacancy_info_from_url(self) -> str:
@@ -263,7 +263,6 @@ class GeekBrainsParser:
             url = "https://gb.ru/courses/all"
             course_links = self.get_course_links(url)
             for link in sorted(course_links):
-
                 self.course_dict[link] = {}
                 title, description = self.title_and_description(link)
                 self.course_dict[link]["title"] = title
@@ -271,19 +270,20 @@ class GeekBrainsParser:
 
                 courses1 = self.extract_text_between_phrases(link, "Изучаемые ", "Диплом")
                 courses2 = self.extract_text_between_phrases(link, "Технологии и инструменты", "Диплом")
-                courses3 = self.extract_text_between_phrases(link,"Научитесь работать с основными инструментами", "Диплом")
-                courses4 = self.extract_text_between_phrases(link,"Что вы изуч", "Диплом")
-                courses5 = self.extract_text_after_phrase(link,'Получите все', 20)
-                courses6 = self.extract_text_after_phrase(link,'Чему вы научитесь', 20)
-                courses7 = self.extract_text_after_phrase(link,"Уверенное владение", 20)
+                courses3 = self.extract_text_between_phrases(link, "Научитесь работать с основными инструментами",
+                                                             "Диплом")
+                courses4 = self.extract_text_between_phrases(link, "Что вы изуч", "Диплом")
+                courses5 = self.extract_text_after_phrase(link, 'Получите все', 20)
+                courses6 = self.extract_text_after_phrase(link, 'Чему вы научитесь', 20)
+                courses7 = self.extract_text_after_phrase(link, "Уверенное владение", 20)
                 # courses8 = self.extract_text_after_phrase(link,"Результаты после обучения", 10)
                 skills = courses1 + courses2 + courses3 + courses4 + courses5 + courses6 + courses7
                 self.course_dict[link]["skills"] = skills
 
-                program_track = self.extract_program_track(link, 'Основной бл','Запросить полную')
+                program_track = self.extract_program_track(link, 'Основной бл', 'Запросить полную')
                 self.course_dict[link]["program_track"] = program_track
 
-                price = self.find_price(link,'₽/мес') + self.find_price(link,'₽ /мес.')
+                price = self.find_price(link, '₽/мес') + self.find_price(link, '₽ /мес.')
                 self.course_dict[link]["price"] = price
 
         return self.course_dict
@@ -405,10 +405,8 @@ class Recommender:
         }
 
 
-
-
 def set_visual_components():
-    recommender = Recommender(k=3)    
+    recommender = Recommender(k=3)
     st.empty().markdown("&nbsp;")
     with st.sidebar:
         option = st.radio(
@@ -434,8 +432,6 @@ def set_visual_components():
             dict_hh = (recommender.recommend(input_media, k=6))
             coating_matrix = dict_hh['coverage_mtx'].copy()
 
-           
-
     with st.sidebar:
         st.markdown(f"### :gray[Требования по вакансии:]")
         try:
@@ -447,27 +443,22 @@ def set_visual_components():
         cols = st.columns(2)
         with cols[0]:
             recommend_button = ui.button(text="Рекомендовать",
-                                                 key="styled_btn_tailwind",
-                                                 className="bg-orange-500 text-white", )
+                                         key="styled_btn_tailwind",
+                                         className="bg-orange-500 text-white", )
         with cols[1]:
-            delete_button = ui.button(text="Сбросить", key="d", 
+            delete_button = ui.button(text="Сбросить", key="d",
 
-
-    if recommend_button and not delete_button:
-        st.dataframe(coating_matrix
-        sort_matrix = pd.DataFrame(coating_matrix.sum()).sort_values(by=0, ascending=False).reset_index()
-        st.empty().markdown('''### {}'''.format("Рекомендованные курсы"),
-                            help='Choose either 1 or 2 but not both. If both are selected 1 will be used.')
-        for i in range(len(sort_matrix)):
-            title = f"{sort_matrix['index'][i]}🔥"
-            content = "Специалист по внедрению Искуственного Интеллекта"
-            description = "Срок обучения: 6 месяцев"
-            ui.metric_card(title=title, content=content, description=description, key=f"card{i}")
-
+        if recommend_button and not delete_button:
+            st.dataframe(coating_matrix
+            sort_matrix = pd.DataFrame(coating_matrix.sum()).sort_values(by=0, ascending=False).reset_index()
+            st.empty().markdown('''### {}'''.format("Рекомендованные курсы"),
+                                help='Choose either 1 or 2 but not both. If both are selected 1 will be used.')
+            for i in range(len(sort_matrix)):
+                title = f"{sort_matrix['index'][i]}🔥"
+                content = "Специалист по внедрению Искуственного Интеллекта"
+                description = "Срок обучения: 6 месяцев"
+                ui.metric_card(title=title, content=content, description=description, key=f"card{i}")
 
 if __name__ == "__main__":
-       set_visual_components()
-
-
-
-# Textarea Component
+    set_visual_components()
+            # Textarea Component
