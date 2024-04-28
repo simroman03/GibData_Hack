@@ -409,92 +409,10 @@ class Recommender:
         }
 
 
-# def set_visual_components():
-#     recommender = Recommender(k=3)
-    
-#     st.set_page_config(
-#         page_title="Course Recommender",
-#         page_icon="🧠",
-#         layout="wide",
-#         initial_sidebar_state="expanded",
-#     )
-#     # st.title("Компетентностный подбор образовательных курсов")
-#     st.markdown("# :orange[Компетентностный подбор образовательных курсов [GibData]]")
-#     st.empty().markdown("&nbsp;")
-    
-#     with st.sidebar:
-#         option = st.radio(
-#             label='Выберите способ ввода',
-#             options=[
-#                 'URL-ссылка',
-#                 'PDF-файл',
-#                 'Текстовое описание'
-#             ]
-#         )
-
-#         if option == 'PDF-файл':
-#             input_media = st.file_uploader(label='', type='pdf')
-
-#         else:
-#             mssg = "Прикрепите текстовое описание вакансии или URL-ссылку"
-
-#             """ Плашка для загрузки текста """
-#             input_media = st.text_input(
-#                 mssg,
-#                 label_visibility='visible'
-#             )
-
-#             if input_media is not None and "https" in input_media:
-#                 input_url = input_media
-
-#         load_button = ui.button(text="Загрузить вакансию", key="load")
-    
-#         if load_button and input_url is not None:
-#             hh_parser = HHParser(url=input_url)
-#             job_info = hh_parser.get_job_info()
-
-#             st.markdown(f"### :gray[Требования по вакансии:]")
-#             try:
-#                 st.markdown(f"### :orange[{job_info[0]}]")
-#             except:
-#                 pass
-#             st.empty().markdown('''### {}'''.format("Дополнительные фильтры:"),
-#                                 help='Choose either 1 or 2 but not both. If both are selected 1 will be used.')
-#             switch_comp = {}
-#             for i in range(1, len(job_info)):
-#                 switch_value = ui.switch(default_checked=True, label=job_info[i], key=f"switch_{i}")
-#                 switch_comp[job_info[i]] = switch_value
-
-#             cols = st.columns(2)
-#             with cols[0]:
-#                 recommend_button = ui.button(text="Рекомендовать",
-#                                              key="styled_btn_tailwind",
-#                                              className="bg-orange-500 text-white")
-#             with cols[1]:
-#                 delete_button = ui.button(text="Сбросить", key="d")
-
-#         if recommend_button and not delete_button:
-#             dict_hh = recommender.recommend(job_info, k=6)
-            
-#             coating_matrix = dict_hh['coverage_mtx'].copy()
-#             names = dict_hh['names'].copy()
-            
-#             # sort_matrix = pd.DataFrame(coating_matrix.sum()).sort_values(by=0, ascending=False).reset_index()
-#             # sort_matrix = sort_matrix.style.map(lambda x: f"background-color: {'green' if x >= 0.85 else 'white'}", subset='Value')
-#             st.dataframe(coating_matrix)
-            
-#             st.empty().markdown('''### {}'''.format("Рекомендованные курсы"),
-#                                 help='Choose either 1 or 2 but not both. If both are selected 1 will be used.')
-#             for i in range(len(sort_matrix)):
-#                 # title = f"{sort_matrix['url'][i]}🔥"
-#                 title = "url"
-#                 content = names[i]
-#                 description = "Срок обучения: n месяцев"
-#                 ui.metric_card(title=title, content=content, description=description, key=f"card{i}")
-
-
 def set_visual_components():
     recommender = Recommender(k=3)
+    recommend_button = False
+    delete_button = True
     
     st.set_page_config(
         page_title="Course Recommender",
@@ -502,77 +420,79 @@ def set_visual_components():
         layout="wide",
         initial_sidebar_state="expanded",
     )
-    
+    # st.title("Компетентностный подбор образовательных курсов")
     st.markdown("# :orange[Компетентностный подбор образовательных курсов [GibData]]")
     st.empty().markdown("&nbsp;")
     
-    option = st.radio(
-        label='Выберите способ ввода',
-        options=[
-            'URL-ссылка',
-            'PDF-файл',
-            'Текстовое описание'
-        ]
-    )
-
-    if option == 'PDF-файл':
-        input_media = st.file_uploader(label='', type='pdf')
-
-    else:
-        mssg = "Прикрепите текстовое описание вакансии или URL-ссылку"
-
-        """ Плашка для загрузки текста """
-        input_media = st.text_input(
-            mssg,
-            label_visibility='visible'
+    with st.sidebar:
+        option = st.radio(
+            label='Выберите способ ввода',
+            options=[
+                'URL-ссылка',
+                'PDF-файл',
+                'Текстовое описание'
+            ]
         )
 
-        if input_media is not None and "https" in input_media:
-            input_url = input_media
+        if option == 'PDF-файл':
+            input_media = st.file_uploader(label='', type='pdf')
 
-    load_button = st.button(text="Загрузить вакансию", key="load")
+        else:
+            mssg = "Прикрепите текстовое описание вакансии или URL-ссылку"
+
+            """ Плашка для загрузки текста """
+            input_media = st.text_input(
+                mssg,
+                label_visibility='visible'
+            )
+
+            if input_media is not None and "https" in input_media:
+                input_url = input_media
+
+        load_button = ui.button(text="Загрузить вакансию", key="load")
     
-    if load_button and input_url is not None:
-        hh_parser = HHParser(url=input_url)
-        job_info = hh_parser.get_job_info()
+        if load_button and input_url is not None:
+            hh_parser = HHParser(url=input_url)
+            job_info = hh_parser.get_job_info()
 
-        st.markdown(f"### :gray[Требования по вакансии:]")
-        try:
-            st.markdown(f"### :orange[{job_info[0]}]")
-        except:
-            pass
-        st.empty().markdown('''### {}'''.format("Дополнительные фильтры:"),
-                            help='Choose either 1 or 2 but not both. If both are selected 1 will be used.')
-        switch_comp = {}
-        for i in range(1, len(job_info)):
-            switch_value = st.switch(default_checked=True, label=job_info[i], key=f"switch_{i}")
-            switch_comp[job_info[i]] = switch_value
+            st.markdown(f"### :gray[Требования по вакансии:]")
+            try:
+                st.markdown(f"### :orange[{job_info[0]}]")
+            except:
+                pass
+            st.empty().markdown('''### {}'''.format("Дополнительные фильтры:"),
+                                help='Choose either 1 or 2 but not both. If both are selected 1 will be used.')
+            switch_comp = {}
+            for i in range(1, len(job_info)):
+                switch_value = ui.switch(default_checked=True, label=job_info[i], key=f"switch_{i}")
+                switch_comp[job_info[i]] = switch_value
 
-        with st.container():
-            recommend_button = st.button(text="Рекомендовать",
-                                         key="styled_btn_tailwind",
-                                         className="bg-orange-500 text-white")
+            cols = st.columns(2)
+            with cols[0]:
+                recommend_button = ui.button(text="Рекомендовать",
+                                             key="styled_btn_tailwind",
+                                             className="bg-orange-500 text-white")
+            with cols[1]:
+                delete_button = ui.button(text="Сбросить", key="d")
+
+        if recommend_button and not delete_button:
+            dict_hh = recommender.recommend(job_info, k=6)
             
-            delete_button = st.button(text="Сбросить", key="d")
-
-    if recommend_button and not delete_button:
-        dict_hh = recommender.recommend(job_info, k=6)
-        
-        coating_matrix = dict_hh['coverage_mtx'].copy()
-        names = dict_hh['names'].copy()
-        
-        # sort_matrix = pd.DataFrame(coating_matrix.sum()).sort_values(by=0, ascending=False).reset_index()
-        # sort_matrix = sort_matrix.style.map(lambda x: f"background-color: {'green' if x >= 0.85 else 'white'}", subset='Value')
-        st.dataframe(coating_matrix)
-        
-        st.empty().markdown('''### {}'''.format("Рекомендованные курсы"),
-                            help='Choose either 1 or 2 but not both. If both are selected 1 will be used.')
-        for i in range(len(sort_matrix)):
-            # title = f"{sort_matrix['url'][i]}🔥"
-            title = "url"
-            content = names[i]
-            description = "Срок обучения: n месяцев"
-            st.metric_card(title=title, content=content, description=description, key=f"card{i}")
+            coating_matrix = dict_hh['coverage_mtx'].copy()
+            names = dict_hh['names'].copy()
+            
+            # sort_matrix = pd.DataFrame(coating_matrix.sum()).sort_values(by=0, ascending=False).reset_index()
+            # sort_matrix = sort_matrix.style.map(lambda x: f"background-color: {'green' if x >= 0.85 else 'white'}", subset='Value')
+            st.dataframe(coating_matrix)
+            
+            st.empty().markdown('''### {}'''.format("Рекомендованные курсы"),
+                                help='Choose either 1 or 2 but not both. If both are selected 1 will be used.')
+            for i in range(len(sort_matrix)):
+                # title = f"{sort_matrix['url'][i]}🔥"
+                title = "url"
+                content = names[i]
+                description = "Срок обучения: n месяцев"
+                ui.metric_card(title=title, content=content, description=description, key=f"card{i}")
 
 
 if __name__ == "__main__":
