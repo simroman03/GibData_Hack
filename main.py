@@ -13,6 +13,65 @@ import pandas as pd
 import numpy as np
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
+from PyPDF2 import PdfReader
+
+class TextExtractor:
+    def __init__(self, text):
+        self.text = text
+        self.name = self.get_name_with_cohere()
+        self.skills = self.get_key_skills_with_cohere()
+
+    def get_name_with_cohere(self):
+        if self.text:
+            prompt = f"У тебя на вход есть текст {self.text}. Нужно выдать json с названием вакансии. Json в формате 'название': '...'"
+            co = cohere.Client("8rP3am6NDcGmGieq6x8E80Wps4nU3xXZSoYSucaw")
+            completion = co.chat(
+                message=prompt,
+                model='command-r-plus',
+                temperature=0.01,
+            )
+            result = completion.text
+            return json.loads(result)
+        else:
+            return "No text provided"
+
+    def get_key_skills_with_cohere(self):
+        if self.text:
+            prompt = f"У тебя на вход есть текст {self.text}. Нужно выдать json cо всеми ключевыми навыками и технологиями в данном описании. Json в формате 'навыки': ['...', ..., '...']"
+            co = cohere.Client("8rP3am6NDcGmGieq6x8E80Wps4nU3xXZSoYSucaw")
+            completion = co.chat(
+                message=prompt,
+                model='command-r-plus',
+                temperature=0.01,
+            )
+            result = completion.text
+            return json.loads(result)
+        else:
+            return "No text provided"
+
+    def get_job_info(self):
+        return self.name + self.skills
+
+class FileParser:
+    def __init__(self, file_path):
+        self.file_path = file_path
+        self.pdf_text = self.read_pdf()
+        self.text_extractor = TextExtractor(self.pdf_text)
+        self.job_info = self.text_extractor.get_job_info()
+
+    def read_pdf(self, file_path):
+        text = ""
+        with open(file_path, "rb") as f:
+            reader = PdfReader(f)
+            num_pages = len(reader.pages)
+            for page_num in range(num_pages):
+                page = reader.pages[page_num]
+                text += page.extract_text()
+        return text
+
+    def get_job_info(self):
+        return self.job_info
+
 
 
 class HHParser:
@@ -31,12 +90,12 @@ class HHParser:
         key_skills = vacancy.get("key_skills")
         vacancy_desc = vacancy.get("description")
         return (
-                f"ID: {vacancy_id}\nНазвание: {vacancy_title}"
-                + f"\nКомпания: {company_name}\nURL: {vacancy_url}"
-                + f"\nОпыт: {vacancy_exp}\nЗанятость: {vacancy_empl}"
-                + f"\nЗП: {salary}\nРоль:{professional_roles}"
-                + f"\nКлючевые навыки: {key_skills}\n"
-                + f"\nОписание: {vacancy_desc}\n"
+            f"ID: {vacancy_id}\nНазвание: {vacancy_title}"
+            + f"\nКомпания: {company_name}\nURL: {vacancy_url}"
+            + f"\nОпыт: {vacancy_exp}\nЗанятость: {vacancy_empl}"
+            + f"\nЗП: {salary}\nРоль:{professional_roles}"
+            + f"\nКлючевые навыки: {key_skills}\n"
+            + f"\nОписание: {vacancy_desc}\n"
         )
 
     def get_vacancy_info_from_url(self) -> str:
@@ -77,8 +136,13 @@ class HHParser:
 
 
 class GeekBrainsParser:
-    def __init__(self):
-        self.course_dict = {}
+    def __init__(self, geek_brains_courses_path=None):
+        self.geek_brains_courses_path = geek_brains_courses_path
+        if geek_brains_courses_path is not None:
+            self.geek_brains_data = pd.read_parquet(self.geek_brains_courses_path)
+            self.course_dict = self.geek_brains_data.to_dict()
+        else:
+            self.course_dict = {}
 
     def get_course_links(self, url):
         response = requests.get(url)
@@ -90,7 +154,7 @@ class GeekBrainsParser:
             filtered_links = [link for link in links_on_course if re.match(pattern, link)]
             return filtered_links
         else:
-            st.write("Ошибка при загрузке страницы:", response.status_code)
+            print("Ошибка при загрузке страницы:", response.status_code)
             return []
 
     def get_html_from_url(self, url):
@@ -149,7 +213,7 @@ class GeekBrainsParser:
             extracted_list = [line.strip() for line in extracted_list if line.strip()]
             return extracted_list
         else:
-            return ["Не нашлось"]
+            return []
 
     def title_and_description(self, url):
         html = self.get_html_from_url(url)
@@ -165,47 +229,107 @@ class GeekBrainsParser:
             pass
         return title, promo_text
 
+    def find_price(self, url, target_char):
+        # Получаем все цены со страницы
+        html = self.get_html_from_url(url)
+        cleaned_text = self.clean_html(html)
+        currency_positions = [m.start() for m in re.finditer(target_char, cleaned_text)]
+        prices = []
+
+        for pos in currency_positions:
+            substr = cleaned_text[pos - 8:pos + 5]
+            numbers = re.findall(r'\d+', substr)
+            price = ''.join(numbers)
+            if price:
+                prices.append(price)
+
+        if len(prices) == 2:
+            prices = [prices[0]]
+
+        if len(prices) == 4:
+            prices = [prices[1]]
+
+        if len(prices) == 5:
+            prices = [prices[0]]
+
+        if len(prices) == 6:
+            prices = ['4049']
+        return prices
+
     def get_courses_dict(self):
-        url = "https://gb.ru/courses/all"
-        course_links = self.get_course_links(url)
-        for link in sorted(course_links):
-            self.course_dict[link] = []
-            title, description = self.title_and_description(link)
-            self.course_dict[link] += [title]
-            courses1 = self.extract_text_between_phrases(link, "Изучаемые ", "Диплом")
-            courses2 = self.extract_text_between_phrases(link, "Технологии и инструменты", "Диплом")
-            courses3 = self.extract_text_between_phrases(link, "Научитесь работать с основными инструментами", "Диплом")
-            courses4 = self.extract_text_between_phrases(link, "Что вы изуч", "Диплом")
-            courses5 = self.extract_text_after_phrase(link, 'Получите все', 20)
-            courses6 = self.extract_text_after_phrase(link, 'Чему вы научитесь', 20)
-            courses7 = self.extract_text_after_phrase(link, "Уверенное владение", 20)
-            # courses8 = extract_text_after_phrase(link,"Результаты после обучения", 10)
-            # program_track1 = extract_program_track(link, 'Основной бл','Запросить полную')
-            # program_track2 = extract_program_track(link, 'Курс','Запросить полную')
-            skills = courses1 + courses2 + courses3 + courses4 + courses5 + courses6 + courses7
-            self.course_dict[link] += skills
+        if not self.course_dict:
+            url = "https://gb.ru/courses/all"
+            course_links = self.get_course_links(url)
+            for link in sorted(course_links):
+
+                self.course_dict[link] = {}
+                title, description = self.title_and_description(link)
+                self.course_dict[link]["title"] = title
+                self.course_dict[link]["description"] = description
+
+                courses1 = self.extract_text_between_phrases(link, "Изучаемые ", "Диплом")
+                courses2 = self.extract_text_between_phrases(link, "Технологии и инструменты", "Диплом")
+                courses3 = self.extract_text_between_phrases(link,"Научитесь работать с основными инструментами", "Диплом")
+                courses4 = self.extract_text_between_phrases(link,"Что вы изуч", "Диплом")
+                courses5 = self.extract_text_after_phrase(link,'Получите все', 20)
+                courses6 = self.extract_text_after_phrase(link,'Чему вы научитесь', 20)
+                courses7 = self.extract_text_after_phrase(link,"Уверенное владение", 20)
+                # courses8 = self.extract_text_after_phrase(link,"Результаты после обучения", 10)
+                skills = courses1 + courses2 + courses3 + courses4 + courses5 + courses6 + courses7
+                self.course_dict[link]["skills"] = skills
+
+                program_track = self.extract_program_track(link, 'Основной бл','Запросить полную')
+                self.course_dict[link]["program_track"] = program_track
+
+                price = self.find_price(link,'₽/мес') + self.find_price(link,'₽ /мес.')
+                self.course_dict[link]["price"] = price
+
         return self.course_dict
 
 
 class Recommender:
     def __init__(self, k: int):
         self.k = k
-        self.init_modules()
-
-    def init_modules(self):
-        # Парсер GeekBrains
-        st.write("[INFO]: Парсинг данных с GeekBrains.ru...")
-        self.geek_brain_parser = GeekBrainsParser()
-        self.courses_dict = self.geek_brain_parser.get_courses_dict()
-        st.write("[SUCCESS]: Парсинг данных успешен.")
-
         self.geekbrains_embeddings = {}
         self.reshaped_geekbrains_embeddings = {}
+        self.init_gb_parser()
+        self.init_bert()
 
-        # Bert Base NLI Mean Tokens
-        st.write("[INFO]: Загрузка берта с GeekBrains.ru...")
+    def init_bert(self):
+        print("[INFO]: Загрузка bert-base-nli-mean-tokens...")
         self.bert = SentenceTransformer('bert-base-nli-mean-tokens')
-        st.write("[SUCCESS]: Берт загружен.")
+        print("[SUCCESS]: Берт загружен.")
+
+    def init_gb_parser(self):
+        print("[INFO]: Парсинг данных с GeekBrains.ru...")
+        self.geek_brain_parser = GeekBrainsParser(geek_brains_courses_path="geek_brains_courses_data.parquet")
+        courses_dict = self.geek_brain_parser.get_courses_dict()
+        result = {}
+        for i, row in pd.DataFrame(courses_dict).iterrows():
+            result[row["url"]] = [row["title"]] + list(row["skills"])
+        self.courses_dict = result
+        print("[SUCCESS]: Парсинг данных успешен.")
+
+    def get_job_info_from_text(self, text):
+        print("[INFO]: Парсинг данных с текста...")
+        self.text_extractor = TextExtractor(text=text)
+        job_info = self.text_extractor.get_job_info()
+        print("[SUCCESS]: Парсинг данных успешен.")
+        return job_info
+
+    def get_job_info_from_pdf(self, file_path):
+        print("[INFO]: Парсинг данных с PDF...")
+        self.file_parser = FileParser(file_path=file_path)
+        job_info = self.file_parser.get_job_info()
+        print("[SUCCESS]: Парсинг данных успешен.")
+        return job_info
+
+    def get_job_info_from_url(self, url):
+        print("[INFO]: Парсинг данных с hh.ru...")
+        self.hh_parser = HHParser(url=url)
+        job_info = self.hh_parser.get_job_info()
+        print("[SUCCESS]: Парсинг данных успешен.")
+        return job_info
 
     def get_embeddings_bert_base_nli_mean_tokens(self, text):
         sen_embeddings = self.bert.encode(text)
@@ -230,29 +354,58 @@ class Recommender:
         score = score / len(job)
         return round(score, 3)
 
-    def recommend(self, url: str, k: int or None = None):
+    def get_coverage_mtx(self, recommendations, job_info):
+        courses_dict = self.courses_dict
+        competencies = job_info[1:]
+        coverage_mtx = pd.DataFrame({"competencies": competencies})
+        coverage_mtx = coverage_mtx.set_index("competencies")
+
+        for course_url in recommendations:
+            coverage_mtx[course_url] = np.zeros(len(competencies))
+            for competence in competencies:
+                if len(courses_dict.get(course_url)) < 2:
+                    break
+                coverage_mtx.loc[competence, course_url] = self.semantic_similarity_bert_base_nli_mean_tokens(
+                    [competence], courses_dict.get(course_url)[1:]
+                )
+        return coverage_mtx
+
+    def recommend(self, input, k: int or None = None):
+        if input[-4:] == ".pdf":
+            job_info = self.get_job_info_from_pdf(input)
+        elif "https" in input:
+            job_info = self.get_job_info_from_url(input)
+        else:
+            job_info = self.get_job_info_from_text(input)
+
         if k is None:
             k = self.k
-        st.write("[INFO]: Парсинг данных с hh.ru...")
-        self.hh_parser = HHParser(url=url)
-        self.job_info = self.hh_parser.get_job_info()
-        st.write("[SUCCESS]: Парсинг данных успешен.")
 
         recomendations = {}
         for url, course_info in self.courses_dict.items():
             recomendations[url] = self.semantic_similarity_bert_base_nli_mean_tokens(
-                self.job_info, course_info
+                job_info, course_info
             )
         recomendations_df = pd.DataFrame({"url": recomendations.keys(), "sim": recomendations.values()})
         recomendations_df = recomendations_df.sort_values(by="sim", ascending=False)
+        recomendations = list(recomendations_df.iloc[:k, 0].values)
+
+        names = [self.courses_dict.get(recomendation_url)[0] for recomendation_url in recomendations]
+        print(recomendations)
+        print(names)
+        print(job_info)
+        coverage_mtx = self.get_coverage_mtx(recommendations, job_info)
         return {
-            "recommendations": list(recomendations_df.iloc[:k, 0].values),
-            "job_info": self.job_info,
+            "recommendations": recomendations,
+            "job_info": job_info,
+            "coverage_mtx": coverage_mtx,
+            "names": names,
         }
 
 
+
 def set_visual_components():
-    recommender = Recommender(k=5)    
+    recommender = Recommender(k=3)    
     st.write(recommender.recommend("https://hh.ru/vacancy/97976633", k=3))
     st.empty().markdown("&nbsp;")
     with st.sidebar:
