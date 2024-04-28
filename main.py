@@ -464,16 +464,16 @@ def set_visual_components():
         with cols[1]:
             delete_button = ui.button(text="Сбросить", key="d")
     
-            if recommend_button and not delete_button:
-                st.dataframe(coating_matrix)
-                sort_matrix = pd.DataFrame(coating_matrix.sum()).sort_values(by=0, ascending=False).reset_index()
-                st.empty().markdown('''### {}'''.format("Рекомендованные курсы"),
-                                    help='Choose either 1 or 2 but not both. If both are selected 1 will be used.')
-                for i in range(len(sort_matrix)):
-                    title = f"{sort_matrix['index'][i]}🔥"
-                    content = "Специалист по внедрению Искуственного Интеллекта"
-                    description = "Срок обучения: 6 месяцев"
-                    ui.metric_card(title=title, content=content, description=description, key=f"card{i}")
+    if recommend_button and not delete_button and coating_matrix:
+        st.dataframe(coating_matrix)
+        sort_matrix = pd.DataFrame(coating_matrix.sum()).sort_values(by=0, ascending=False).reset_index()
+        st.empty().markdown('''### {}'''.format("Рекомендованные курсы"),
+                            help='Choose either 1 or 2 but not both. If both are selected 1 will be used.')
+        for i in range(len(sort_matrix)):
+            title = f"{sort_matrix['index'][i]}🔥"
+            content = "Специалист по внедрению Искуственного Интеллекта"
+            description = "Срок обучения: 6 месяцев"
+            ui.metric_card(title=title, content=content, description=description, key=f"card{i}")
 
 if __name__ == "__main__":
     set_visual_components()
