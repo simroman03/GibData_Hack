@@ -479,7 +479,7 @@ def set_visual_components():
                 delete_button = ui.button(text="Сбросить", key="d")
         
             if recommend_button and not delete_button:
-                dict_hh = recommender.recommend(job_info, k=6)
+                dict_hh = recommender.recommend(job_info, k=2)
                 is_calculated = True
 
     if job_parse:
