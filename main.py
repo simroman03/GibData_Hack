@@ -361,9 +361,9 @@ class Recommender:
     def get_coverage_mtx(self, recommendations, job_info):
         courses_dict = self.courses_dict
         competencies = job_info[1:]
-        coverage_mtx = pd.DataFrame({"competencies": competencies})
-        coverage_mtx = coverage_mtx.set_index("competencies")
-
+        coverage_mtx = pd.DataFrame(index=competencies)  # Provide the index here
+        # No need to set index separately now
+    
         for course_url in recommendations:
             coverage_mtx[course_url] = np.zeros(len(competencies))
             for competence in competencies:
