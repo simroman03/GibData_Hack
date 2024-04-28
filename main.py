@@ -414,6 +414,7 @@ def set_visual_components():
     recommend_button = False
     delete_button = True
     is_calculated = False
+    job_parse = False
     
     st.set_page_config(
         page_title="Course Recommender",
@@ -455,6 +456,7 @@ def set_visual_components():
         if load_button and input_url is not None:
             hh_parser = HHParser(url=input_url)
             job_info = hh_parser.get_job_info()
+            job_parse = True
 
             st.markdown(f"### :gray[Требования по вакансии:]")
             try:
@@ -468,34 +470,35 @@ def set_visual_components():
                 switch_value = ui.switch(default_checked=True, label=job_info[i], key=f"switch_{i}")
                 switch_comp[job_info[i]] = switch_value
 
-            cols = st.columns(2)
-            with cols[0]:
-                recommend_button = ui.button(text="Рекомендовать",
-                                             key="styled_btn_tailwind",
-                                             className="bg-orange-500 text-white")
-            with cols[1]:
-                delete_button = ui.button(text="Сбросить", key="d")
-
-            if recommend_button and not delete_button:
-                dict_hh = recommender.recommend(job_info, k=6)
-                is_calculated = True
-
-    if is_calculated:
-        coating_matrix = dict_hh['coverage_mtx'].copy()
-        names = dict_hh['names'].copy()
-        
-        # sort_matrix = pd.DataFrame(coating_matrix.sum()).sort_values(by=0, ascending=False).reset_index()
-        # sort_matrix = sort_matrix.style.map(lambda x: f"background-color: {'green' if x >= 0.85 else 'white'}", subset='Value')
-        st.dataframe(coating_matrix)
-        
-        st.empty().markdown('''### {}'''.format("Рекомендованные курсы"),
-                            help='Choose either 1 or 2 but not both. If both are selected 1 will be used.')
-        for i in range(len(sort_matrix)):
-            # title = f"{sort_matrix['url'][i]}🔥"
-            title = "url"
-            content = names[i]
-            description = "Срок обучения: n месяцев"
-            ui.metric_card(title=title, content=content, description=description, key=f"card{i}")
+    if job_parse:
+        cols = st.columns(2)
+        with cols[0]:
+            recommend_button = ui.button(text="Рекомендовать",
+                                         key="styled_btn_tailwind",
+                                         className="bg-orange-500 text-white")
+        with cols[1]:
+            delete_button = ui.button(text="Сбросить", key="d")
+    
+        if recommend_button and not delete_button:
+            dict_hh = recommender.recommend(job_info, k=6)
+            is_calculated = True
+    
+        if is_calculated:
+            coating_matrix = dict_hh['coverage_mtx'].copy()
+            names = dict_hh['names'].copy()
+            
+            # sort_matrix = pd.DataFrame(coating_matrix.sum()).sort_values(by=0, ascending=False).reset_index()
+            # sort_matrix = sort_matrix.style.map(lambda x: f"background-color: {'green' if x >= 0.85 else 'white'}", subset='Value')
+            st.dataframe(coating_matrix)
+            
+            st.empty().markdown('''### {}'''.format("Рекомендованные курсы"),
+                                help='Choose either 1 or 2 but not both. If both are selected 1 will be used.')
+            for i in range(len(sort_matrix)):
+                # title = f"{sort_matrix['url'][i]}🔥"
+                title = "url"
+                content = names[i]
+                description = "Срок обучения: n месяцев"
+                ui.metric_card(title=title, content=content, description=description, key=f"card{i}")
 
 
 if __name__ == "__main__":
