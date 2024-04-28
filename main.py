@@ -417,8 +417,7 @@ def set_visual_components():
         initial_sidebar_state="expanded",
     )
     # st.title("Компетентностный подбор образовательных курсов")
-    st.markdown("# :rainbow[Компетентностный подбор образовательных курсов [GibData]]")
-    st.empty().markdown("&nbsp;")
+    st.markdown("# :orange[Компетентностный подбор образовательных курсов [GibData]]")
     st.empty().markdown("&nbsp;")
     
     with st.sidebar:
@@ -447,33 +446,32 @@ def set_visual_components():
                 dict_hh = recommender.recommend(input_media, k=6)
                 coating_matrix = dict_hh['coverage_mtx'].copy()
 
-    with st.sidebar:
-        st.markdown(f"### :gray[Требования по вакансии:]")
-        try:
-            st.markdown(f"### :orange[{dict_hh['job_info'][0]}]")
-        except:
-            pass
-        for i in range(1, len(dict_hh['job_info'])):
-            switch_value = ui.switch(default_checked=True, label=dict_hh['job_info'][i], key=f"switch_{i}")
+                st.markdown(f"### :gray[Требования по вакансии:]")
+                try:
+                    st.markdown(f"### :orange[{dict_hh['job_info'][0]}]")
+                except:
+                    pass
+                for i in range(1, len(dict_hh['job_info'])):
+                    switch_value = ui.switch(default_checked=True, label=dict_hh['job_info'][i], key=f"switch_{i}")
         
-    cols = st.columns(2)
-    with cols[0]:
-        recommend_button = ui.button(text="Рекомендовать",
-                                     key="styled_btn_tailwind",
-                                     className="bg-orange-500 text-white")
-    with cols[1]:
-        delete_button = ui.button(text="Сбросить", key="d")
-
-        if recommend_button and not delete_button:
-            st.dataframe(coating_matrix)
-            sort_matrix = pd.DataFrame(coating_matrix.sum()).sort_values(by=0, ascending=False).reset_index()
-            st.empty().markdown('''### {}'''.format("Рекомендованные курсы"),
-                                help='Choose either 1 or 2 but not both. If both are selected 1 will be used.')
-            for i in range(len(sort_matrix)):
-                title = f"{sort_matrix['index'][i]}🔥"
-                content = "Специалист по внедрению Искуственного Интеллекта"
-                description = "Срок обучения: 6 месяцев"
-                ui.metric_card(title=title, content=content, description=description, key=f"card{i}")
+        cols = st.columns(2)
+        with cols[0]:
+            recommend_button = ui.button(text="Рекомендовать",
+                                         key="styled_btn_tailwind",
+                                         className="bg-orange-500 text-white")
+        with cols[1]:
+            delete_button = ui.button(text="Сбросить", key="d")
+    
+            if recommend_button and not delete_button:
+                st.dataframe(coating_matrix)
+                sort_matrix = pd.DataFrame(coating_matrix.sum()).sort_values(by=0, ascending=False).reset_index()
+                st.empty().markdown('''### {}'''.format("Рекомендованные курсы"),
+                                    help='Choose either 1 or 2 but not both. If both are selected 1 will be used.')
+                for i in range(len(sort_matrix)):
+                    title = f"{sort_matrix['index'][i]}🔥"
+                    content = "Специалист по внедрению Искуственного Интеллекта"
+                    description = "Срок обучения: 6 месяцев"
+                    ui.metric_card(title=title, content=content, description=description, key=f"card{i}")
 
 if __name__ == "__main__":
     set_visual_components()
