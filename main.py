@@ -483,7 +483,7 @@ def set_visual_components():
             recommend_button = True
             if recommend_button: # and not delete_button:
                 st.write("in recommend_button")
-                dict_hh = recommender.recommend(job_info, k=2)
+                dict_hh = recommender.recommend(job_info, k=4)
                 is_calculated = True
 
     if job_parse:
@@ -491,18 +491,21 @@ def set_visual_components():
             coating_matrix = dict_hh['coverage_mtx'].copy()
             names = dict_hh['names'].copy()
             
-            # sort_matrix = pd.DataFrame(coating_matrix.sum()).sort_values(by=0, ascending=False).reset_index()
-            # sort_matrix = sort_matrix.style.map(lambda x: f"background-color: {'green' if x >= 0.85 else 'white'}", subset='Value')
-            st.dataframe(coating_matrix)
-            
             st.empty().markdown('''### {}'''.format("Рекомендованные курсы"),
                                 help='Choose either 1 or 2 but not both. If both are selected 1 will be used.')
-            for i in range(len(sort_matrix)):
-                # title = f"{sort_matrix['url'][i]}🔥"
-                title = "url"
+
+            for i in range(len(coating_matrix)):
+                # title = f"{coating_matrix['url'][i]}🔥"
+                title = names[i]
                 content = names[i]
                 description = "Срок обучения: n месяцев"
                 ui.metric_card(title=title, content=content, description=description, key=f"card{i}")
+
+            st.empty().markdown('''### {}'''.format("Матрица компетенций"),
+                                help='Choose either 1 or 2 but not both. If both are selected 1 will be used.')
+            # sort_matrix = pd.DataFrame(coating_matrix.sum()).sort_values(by=0, ascending=False).reset_index()
+            # sort_matrix = sort_matrix.style.map(lambda x: f"background-color: {'green' if x >= 0.85 else 'white'}", subset='Value')
+            st.dataframe(coating_matrix)
 
 
 if __name__ == "__main__":
