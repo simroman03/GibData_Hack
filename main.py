@@ -14,6 +14,8 @@ import numpy as np
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 from PyPDF2 import PdfReader
+import cohere
+
 
 class TextExtractor:
     def __init__(self, text):
