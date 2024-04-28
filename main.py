@@ -447,7 +447,7 @@ def set_visual_components():
             if input_media is not None and "https" in input_media:
                 input_url = input_media
 
-        load_button = ui.button(text="Загрузить вакансию", key="d")
+        load_button = ui.button(text="Загрузить вакансию", key="load")
     
         if load_button and input_url is not None:
             hh_parser = HHParser(url=input_url)
