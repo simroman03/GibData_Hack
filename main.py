@@ -457,7 +457,7 @@ def set_visual_components():
     
         if recommend_button and not delete_button and input_url is not None:
             hh_parser = HHParser(url=input_url)
-            job_info = self.hh_parser.get_job_info()
+            job_info = hh_parser.get_job_info()
 
             st.markdown(f"### :gray[Требования по вакансии:]")
             try:
@@ -483,7 +483,8 @@ def set_visual_components():
             st.empty().markdown('''### {}'''.format("Рекомендованные курсы"),
                                 help='Choose either 1 or 2 but not both. If both are selected 1 will be used.')
             for i in range(len(sort_matrix)):
-                title = f"{sort_matrix['index'][i]}🔥"
+                # title = f"{sort_matrix['url'][i]}🔥"
+                title = "url"
                 content = names[i]
                 description = "Срок обучения: n месяцев"
                 ui.metric_card(title=title, content=content, description=description, key=f"card{i}")
