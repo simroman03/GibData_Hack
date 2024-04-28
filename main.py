@@ -479,7 +479,7 @@ def set_visual_components():
             with cols[1]:
                 delete_button = ui.button(text="Сбросить", key="d")
             st.write("recommend_button")
-            if recommend_button and not delete_button:
+            if recommend_button # and not delete_button:
                 st.write("in recommend_button")
                 dict_hh = recommender.recommend(job_info, k=2)
                 is_calculated = True
