@@ -451,6 +451,8 @@ def set_visual_components():
                     st.markdown(f"### :orange[{dict_hh['job_info'][0]}]")
                 except:
                     pass
+                st.empty().markdown('''### {}'''.format("Дополнительные фильтры:"),
+                                    help='Choose either 1 or 2 but not both. If both are selected 1 will be used.')
                 for i in range(1, len(dict_hh['job_info'])):
                     switch_value = ui.switch(default_checked=True, label=dict_hh['job_info'][i], key=f"switch_{i}")
         
