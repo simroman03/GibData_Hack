@@ -366,7 +366,7 @@ class Recommender:
             coverage_mtx[course_url] = np.zeros(len(competencies))
             for competence in competencies:
                 if len(courses_dict.get(course_url)) < 2:
-                    break
+                    coverage_mtx.loc[:, course_url] = 0.5
                 coverage_mtx.loc[competence, course_url] = self.semantic_similarity_bert_base_nli_mean_tokens(
                     [competence], courses_dict.get(course_url)[1:]
                 )
@@ -383,26 +383,27 @@ class Recommender:
         if k is None:
             k = self.k
 
-        recomendations = {}
+        recommendations = {}
         for url, course_info in self.courses_dict.items():
-            recomendations[url] = self.semantic_similarity_bert_base_nli_mean_tokens(
+            recommendations[url] = self.semantic_similarity_bert_base_nli_mean_tokens(
                 job_info, course_info
             )
-        recomendations_df = pd.DataFrame({"url": recomendations.keys(), "sim": recomendations.values()})
-        recomendations_df = recomendations_df.sort_values(by="sim", ascending=False)
-        recomendations = list(recomendations_df.iloc[:k, 0].values)
+        recommendations_df = pd.DataFrame({"url": recommendations.keys(), "sim": recommendations.values()})
+        recommendations_df = recommendations_df.sort_values(by="sim", ascending=False)
+        recommendations = list(recommendations_df.iloc[:k, 0].values)
 
-        names = [self.courses_dict.get(recomendation_url)[0] for recomendation_url in recomendations]
-        print(recomendations)
+        names = [self.courses_dict.get(recommendations_url)[0] for recommendations_url in recommendations]
+        print(recommendations)
         print(names)
         print(job_info)
         coverage_mtx = self.get_coverage_mtx(recommendations, job_info)
         return {
-            "recommendations": recomendations,
+            "recommendations": recommendations,
             "job_info": job_info,
             "coverage_mtx": coverage_mtx,
             "names": names,
         }
+
 
 
 
