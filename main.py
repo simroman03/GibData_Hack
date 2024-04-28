@@ -445,9 +445,9 @@ def set_visual_components():
                 mssg,
                 label_visibility='visible'
             )
-            st.write("input media")
+            # st.write("input media")
             if input_media is not None and "https" in input_media:
-                st.write("in input media")
+                # st.write("in input media")
                 input_url = input_media
 
         load_button = ui.button(text="Загрузить вакансию", key="load")
@@ -457,7 +457,7 @@ def set_visual_components():
             hh_parser = HHParser(url=input_url)
             job_info = hh_parser.get_job_info()
             job_parse = True
-            st.write("in load button")
+            # st.write("in load button")
 
             st.markdown(f"### :gray[Требования по вакансии:]")
             try:
@@ -478,11 +478,11 @@ def set_visual_components():
                                              className="bg-orange-500 text-white")
             with cols[1]:
                 delete_button = ui.button(text="Сбросить", key="d")
-            st.write("recommend_button")
-            st.write(recommend_button)
+            # st.write("recommend_button")
+            # st.write(recommend_button)
             recommend_button = True
             if recommend_button: # and not delete_button:
-                st.write("in recommend_button")
+                # st.write("in recommend_button")
                 dict_hh = recommender.recommend(job_info, k=4)
                 is_calculated = True
 
@@ -494,11 +494,11 @@ def set_visual_components():
             st.empty().markdown('''### {}'''.format("Рекомендованные курсы"),
                                 help='Choose either 1 or 2 but not both. If both are selected 1 will be used.')
 
-            for i in range(len(coating_matrix)):
-                # title = f"{coating_matrix['url'][i]}🔥"
+            for i in range(coating_matrix.shape[1]):
+                # title = f"{coating_matrix['url'][i]}"
                 title = names[i]
                 content = names[i]
-                description = "Срок обучения: n месяцев"
+                description = "Горячее предложение 🔥"
                 ui.metric_card(title=title, content=content, description=description, key=f"card{i}")
 
             st.empty().markdown('''### {}'''.format("Матрица компетенций"),
